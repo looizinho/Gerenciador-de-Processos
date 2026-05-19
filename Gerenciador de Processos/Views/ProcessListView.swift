@@ -21,8 +21,22 @@ struct ProcessListView: View {
         }
         .frame(width: 420, height: 380)
         .sheet(item: $editingProcess) { process in
-            EditProcessView(process: process, isPresented: $editingProcess)
-                .environment(viewModel)
+            EditProcessView(
+                process: process,
+                onSave: { name, command, arguments in
+                    viewModel.updateProcess(
+                        id: process.id,
+                        name: name,
+                        command: command,
+                        arguments: arguments
+                    )
+                    editingProcess = nil
+                },
+                onCancel: {
+                    editingProcess = nil
+                }
+            )
+            .environment(viewModel)
         }
     }
 
@@ -190,10 +204,9 @@ struct ProcessRowView: View {
 // MARK: - EditProcessView
 
 struct EditProcessView: View {
-    @Environment(ProcessManagerViewModel.self) private var viewModel
-
     let process: ManagedProcess
-    @Binding var isPresented: ManagedProcess?
+    let onSave: (String, String, String) -> Void
+    let onCancel: () -> Void
 
     @State private var name      = ""
     @State private var command   = ""
@@ -237,17 +250,19 @@ struct EditProcessView: View {
             }
 
             HStack {
-                Button("Cancelar") { isPresented = nil }
-                    .keyboardShortcut(.cancelAction)
+                Button("Cancelar") {
+                    onCancel()
+                }
+                .keyboardShortcut(.cancelAction)
+
                 Spacer()
+
                 Button("Salvar") {
-                    viewModel.updateProcess(
-                        id:        process.id,
-                        name:      name.trimmingCharacters(in: .whitespaces),
-                        command:   command.trimmingCharacters(in: .whitespaces),
-                        arguments: arguments.trimmingCharacters(in: .whitespaces)
+                    onSave(
+                        name.trimmingCharacters(in: .whitespaces),
+                        command.trimmingCharacters(in: .whitespaces),
+                        arguments.trimmingCharacters(in: .whitespaces)
                     )
-                    isPresented = nil
                 }
                 .keyboardShortcut(.defaultAction)
                 .disabled(!canSave)
