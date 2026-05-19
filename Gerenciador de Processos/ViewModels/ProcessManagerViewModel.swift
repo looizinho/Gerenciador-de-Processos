@@ -35,6 +35,14 @@ class ProcessManagerViewModel {
         persistenceService.save(processes)
     }
 
+    func updateProcess(id: UUID, name: String, command: String, arguments: String) {
+        guard let index = processes.firstIndex(where: { $0.id == id }) else { return }
+        processes[index].name = name
+        processes[index].command = command
+        processes[index].arguments = arguments
+        persistenceService.save(processes)
+    }
+
     func removeProcesses(at offsets: IndexSet) {
         for index in offsets where processes[index].status == .running {
             processService.stop(processes[index])
