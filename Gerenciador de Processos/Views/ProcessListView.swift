@@ -5,6 +5,8 @@ struct ProcessListView: View {
     @Environment(ProcessManagerViewModel.self) private var viewModel
     @Environment(\.openWindow) private var openWindow
 
+    @State private var editingProcess: ManagedProcess?
+
     private var runningCount: Int {
         viewModel.processes.filter { $0.status == .running }.count
     }
@@ -18,6 +20,10 @@ struct ProcessListView: View {
             footer
         }
         .frame(width: 420, height: 380)
+        .sheet(item: $editingProcess) { process in
+            EditProcessView(process: process, isPresented: $editingProcess)
+                .environment(viewModel)
+        }
     }
 
     // MARK: - Header
@@ -79,8 +85,22 @@ struct ProcessListView: View {
             ForEach(viewModel.processes) { process in
                 ProcessRowView(process: process)
                     .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button {
+                            editingProcess = process
+                        } label: {
+                            Image(systemName: "pencil.circle.fill")
+                        }
+                        .tint(.blue)
+                    }
+                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            viewModel.removeProcess(process)
+                        } label: {
+                            Image(systemName: "trash.circle.fill")
+                        }
+                    }
             }
-            .onDelete { viewModel.removeProcesses(at: $0) }
         }
         .listStyle(.plain)
     }
@@ -97,12 +117,15 @@ struct ProcessListView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Encerrar App") {
+            Button {
                 NSApplication.shared.terminate(nil)
+            } label: {
+                Image(systemName: "power.circle.fill")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .help("Encerrar aplicativo")
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
@@ -161,6 +184,110 @@ struct ProcessRowView: View {
         process.arguments.isEmpty
             ? process.command
             : "\(process.command) \(process.arguments)"
+    }
+}
+
+// MARK: - EditProcessView
+
+struct EditProcessView: View {
+    @Environment(ProcessManagerViewModel.self) private var viewModel
+
+    let process: ManagedProcess
+    @Binding var isPresented: ManagedProcess?
+
+    @State private var name      = ""
+    @State private var command   = ""
+    @State private var arguments = ""
+    @FocusState private var focusedField: Field?
+
+    private enum Field { case name, command, arguments }
+
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !command.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Editar Processo")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            VStack(alignment: .leading, spacing: 12) {
+                field(
+                    label: "Nome",
+                    placeholder: "Ex: Servidor Vite",
+                    text: $name,
+                    focus: .name
+                )
+                field(
+                    label: "Comando",
+                    placeholder: "Ex: npm",
+                    text: $command,
+                    focus: .command,
+                    monospaced: true
+                )
+                field(
+                    label: "Argumentos",
+                    placeholder: "Ex: run dev  (opcional)",
+                    text: $arguments,
+                    focus: .arguments,
+                    monospaced: true
+                )
+            }
+
+            HStack {
+                Button("Cancelar") { isPresented = nil }
+                    .keyboardShortcut(.cancelAction)
+                Spacer()
+                Button("Salvar") {
+                    viewModel.updateProcess(
+                        id:        process.id,
+                        name:      name.trimmingCharacters(in: .whitespaces),
+                        command:   command.trimmingCharacters(in: .whitespaces),
+                        arguments: arguments.trimmingCharacters(in: .whitespaces)
+                    )
+                    isPresented = nil
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(!canSave)
+                .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding(24)
+        .frame(width: 420)
+        .onAppear {
+            name = process.name
+            command = process.command
+            arguments = process.arguments
+            focusedField = .name
+        }
+    }
+
+    @ViewBuilder
+    private func field(
+        label: String,
+        placeholder: String,
+        text: Binding<String>,
+        focus: Field,
+        monospaced: Bool = false
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            TextField(placeholder, text: text)
+                .textFieldStyle(.roundedBorder)
+                .font(monospaced ? .system(.body, design: .monospaced) : .body)
+                .focused($focusedField, equals: focus)
+                .onSubmit {
+                    switch focus {
+                    case .name:      focusedField = .command
+                    case .command:   focusedField = .arguments
+                    case .arguments: break
+                    }
+                }
+        }
     }
 }
 
