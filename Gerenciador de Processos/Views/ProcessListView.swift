@@ -23,12 +23,14 @@ struct ProcessListView: View {
         .sheet(item: $editingProcess) { process in
             EditProcessView(
                 process: process,
-                onSave: { name, command, arguments in
+                onSave: { name, command, arguments, path, action in
                     viewModel.updateProcess(
                         id: process.id,
                         name: name,
                         command: command,
-                        arguments: arguments
+                        arguments: arguments,
+                        path: path,
+                        action: action
                     )
                     editingProcess = nil
                 },
@@ -96,24 +98,29 @@ struct ProcessListView: View {
 
     private var processList: some View {
         List {
-            ForEach(viewModel.processes) { process in
-                ProcessRowView(process: process)
-                    .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button {
-                            editingProcess = process
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                        }
-                        .tint(.blue)
+            ForEach(Array(viewModel.processes.enumerated()), id: \.element.id) { index, process in
+                ProcessRowView(
+                    process: process,
+                    onStart: { viewModel.startProcess(process) },
+                    onStop: { viewModel.stopProcess(process) },
+                    onAction: { viewModel.executeAction(process) }
+                )
+                .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button {
+                        editingProcess = process
+                    } label: {
+                        Image(systemName: "pencil.circle.fill")
                     }
-                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            viewModel.removeProcess(process)
-                        } label: {
-                            Image(systemName: "trash.circle.fill")
-                        }
+                    .tint(.blue)
+                }
+                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        viewModel.removeProcess(process)
+                    } label: {
+                        Image(systemName: "trash.circle.fill")
                     }
+                }
             }
         }
         .listStyle(.plain)
@@ -149,10 +156,13 @@ struct ProcessListView: View {
 // MARK: - ProcessRowView
 
 struct ProcessRowView: View {
-    @Environment(ProcessManagerViewModel.self) private var viewModel
     let process: ManagedProcess
+    let onStart: () -> Void
+    let onStop: () -> Void
+    let onAction: () -> Void
 
     private var isRunning: Bool { process.status == .running }
+    private var hasAction: Bool { !process.action.trimmingCharacters(in: .whitespaces).isEmpty }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -171,6 +181,13 @@ struct ProcessRowView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if isRunning && hasAction {
+                    onAction()
+                }
+            }
+            .opacity(isRunning && hasAction ? 1.0 : 0.8)
 
             Spacer()
 
@@ -183,9 +200,9 @@ struct ProcessRowView: View {
 
             Button(isRunning ? "Stop" : "Start") {
                 if isRunning {
-                    viewModel.stopProcess(process)
+                    onStop()
                 } else {
-                    viewModel.startProcess(process)
+                    onStart()
                 }
             }
             .buttonStyle(.bordered)
@@ -205,15 +222,17 @@ struct ProcessRowView: View {
 
 struct EditProcessView: View {
     let process: ManagedProcess
-    let onSave: (String, String, String) -> Void
+    let onSave: (String, String, String, String, String) -> Void
     let onCancel: () -> Void
 
     @State private var name      = ""
     @State private var command   = ""
     @State private var arguments = ""
+    @State private var path      = ""
+    @State private var action    = ""
     @FocusState private var focusedField: Field?
 
-    private enum Field { case name, command, arguments }
+    private enum Field { case name, command, arguments, path, action }
 
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -247,6 +266,20 @@ struct EditProcessView: View {
                     focus: .arguments,
                     monospaced: true
                 )
+                field(
+                    label: "Caminho",
+                    placeholder: "Ex: /Users/nome/projeto  (opcional)",
+                    text: $path,
+                    focus: .path,
+                    monospaced: true
+                )
+                field(
+                    label: "Ação",
+                    placeholder: "Ex: open http://localhost:5173  (opcional)",
+                    text: $action,
+                    focus: .action,
+                    monospaced: true
+                )
             }
 
             HStack {
@@ -261,7 +294,9 @@ struct EditProcessView: View {
                     onSave(
                         name.trimmingCharacters(in: .whitespaces),
                         command.trimmingCharacters(in: .whitespaces),
-                        arguments.trimmingCharacters(in: .whitespaces)
+                        arguments.trimmingCharacters(in: .whitespaces),
+                        path.trimmingCharacters(in: .whitespaces),
+                        action.trimmingCharacters(in: .whitespaces)
                     )
                 }
                 .keyboardShortcut(.defaultAction)
@@ -275,6 +310,8 @@ struct EditProcessView: View {
             name = process.name
             command = process.command
             arguments = process.arguments
+            path = process.path
+            action = process.action
             focusedField = .name
         }
     }
@@ -299,7 +336,9 @@ struct EditProcessView: View {
                     switch focus {
                     case .name:      focusedField = .command
                     case .command:   focusedField = .arguments
-                    case .arguments: break
+                    case .arguments: focusedField = .path
+                    case .path:      focusedField = .action
+                    case .action:    break
                     }
                 }
         }

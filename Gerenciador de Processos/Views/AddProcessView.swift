@@ -7,9 +7,11 @@ struct AddProcessView: View {
     @State private var name      = ""
     @State private var command   = ""
     @State private var arguments = ""
+    @State private var path      = ""
+    @State private var action    = ""
     @FocusState private var focusedField: Field?
 
-    private enum Field { case name, command, arguments }
+    private enum Field { case name, command, arguments, path, action }
 
     private var canAdd: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -43,6 +45,20 @@ struct AddProcessView: View {
                     focus: .arguments,
                     monospaced: true
                 )
+                field(
+                    label: "Caminho",
+                    placeholder: "Ex: /Users/nome/projeto  (opcional)",
+                    text: $path,
+                    focus: .path,
+                    monospaced: true
+                )
+                field(
+                    label: "Ação",
+                    placeholder: "Ex: open http://localhost:5173  (opcional)",
+                    text: $action,
+                    focus: .action,
+                    monospaced: true
+                )
             }
 
             HStack {
@@ -53,7 +69,9 @@ struct AddProcessView: View {
                     viewModel.addProcess(
                         name:      name.trimmingCharacters(in: .whitespaces),
                         command:   command.trimmingCharacters(in: .whitespaces),
-                        arguments: arguments.trimmingCharacters(in: .whitespaces)
+                        arguments: arguments.trimmingCharacters(in: .whitespaces),
+                        path:      path.trimmingCharacters(in: .whitespaces),
+                        action:    action.trimmingCharacters(in: .whitespaces)
                     )
                     dismiss()
                 }
@@ -87,7 +105,9 @@ struct AddProcessView: View {
                     switch focus {
                     case .name:      focusedField = .command
                     case .command:   focusedField = .arguments
-                    case .arguments: break
+                    case .arguments: focusedField = .path
+                    case .path:      focusedField = .action
+                    case .action:    break
                     }
                 }
         }

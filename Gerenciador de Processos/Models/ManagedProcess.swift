@@ -10,21 +10,25 @@ struct ManagedProcess: Identifiable, Codable, Equatable {
     var name: String
     var command: String
     var arguments: String
+    var path: String
+    var action: String
     var status: ProcessStatus
     var pid: Int32?
 
-    init(id: UUID = UUID(), name: String, command: String, arguments: String = "") {
+    init(id: UUID = UUID(), name: String, command: String, arguments: String = "", path: String = "", action: String = "") {
         self.id = id
         self.name = name
         self.command = command
         self.arguments = arguments
+        self.path = path
+        self.action = action
         self.status = .stopped
         self.pid = nil
     }
 
     // Persiste apenas a configuração — status e PID são runtime
     enum CodingKeys: String, CodingKey {
-        case id, name, command, arguments
+        case id, name, command, arguments, path, action
     }
 
     init(from decoder: Decoder) throws {
@@ -33,6 +37,8 @@ struct ManagedProcess: Identifiable, Codable, Equatable {
         name      = try c.decode(String.self, forKey: .name)
         command   = try c.decode(String.self, forKey: .command)
         arguments = try c.decode(String.self, forKey: .arguments)
+        path      = try c.decodeIfPresent(String.self, forKey: .path) ?? ""
+        action    = try c.decodeIfPresent(String.self, forKey: .action) ?? ""
         status    = .stopped
         pid       = nil
     }
@@ -43,5 +49,7 @@ struct ManagedProcess: Identifiable, Codable, Equatable {
         try c.encode(name,      forKey: .name)
         try c.encode(command,   forKey: .command)
         try c.encode(arguments, forKey: .arguments)
+        try c.encode(path,      forKey: .path)
+        try c.encode(action,    forKey: .action)
     }
 }
