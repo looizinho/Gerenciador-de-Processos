@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Gerenciador de Processos (Debug)",
+      "runtimeExecutable": "xcodebuild",
+      "runtimeArgs": [
+        "-project", "Gerenciador de Processos.xcodeproj",
+        "-scheme", "Gerenciador de Processos",
+        "-configuration", "Debug",
+        "-arch", "arm64",
+        "build"
+      ],
+      "port": null
+    }
+  ]
+}
