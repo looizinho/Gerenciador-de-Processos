@@ -23,14 +23,12 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		8C1A00000000000000000008 /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 13;
+			dstSubfolder = PlugIns;
 			files = (
 				8C1A00000000000000000009 /* ProcessWidget.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -126,11 +124,9 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
-				8C1A00000000000000000002 /* ProcessWidget */,
 				8C1A00000000000000000001 /* Shared */,
+				8C1A00000000000000000002 /* ProcessWidget */,
 			);
 			name = ProcessWidget;
 			productName = ProcessWidget;
@@ -369,6 +365,44 @@
 			};
 			name = Debug;
 		};
+		0EF71D4D3049807A00E77647 /* Release configuration for PBXNativeTarget "Companion" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Companion.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = PBJKH22479;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Companion-Info.plist";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "O Companion busca o Gerenciador de Processos na rede local para exibir os processos ativos do Mac.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.smartium.Companion;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		8C1A0000000000000000000C /* Debug configuration for PBXNativeTarget "ProcessWidget" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -433,44 +467,6 @@
 			};
 			name = Release;
 		};
-		0EF71D4D3049807A00E77647 /* Release configuration for PBXNativeTarget "Companion" */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Companion.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PBJKH22479;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Companion-Info.plist";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "O Companion busca o Gerenciador de Processos na rede local para exibir os processos ativos do Mac.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.smartium.Companion;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -482,19 +478,19 @@
 			);
 			defaultConfigurationName = Release;
 		};
-		8C1A0000000000000000000E /* Build configuration list for PBXNativeTarget "ProcessWidget" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				8C1A0000000000000000000C /* Debug configuration for PBXNativeTarget "ProcessWidget" */,
-				8C1A0000000000000000000D /* Release configuration for PBXNativeTarget "ProcessWidget" */,
-			);
-			defaultConfigurationName = Release;
-		};
 		0EF71D4B3049807A00E77647 /* Build configuration list for PBXNativeTarget "Companion" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0EF71D4C3049807A00E77647 /* Debug configuration for PBXNativeTarget "Companion" */,
 				0EF71D4D3049807A00E77647 /* Release configuration for PBXNativeTarget "Companion" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		8C1A0000000000000000000E /* Build configuration list for PBXNativeTarget "ProcessWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8C1A0000000000000000000C /* Debug configuration for PBXNativeTarget "ProcessWidget" */,
+				8C1A0000000000000000000D /* Release configuration for PBXNativeTarget "ProcessWidget" */,
 			);
 			defaultConfigurationName = Release;
 		};
