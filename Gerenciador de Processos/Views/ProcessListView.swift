@@ -23,14 +23,16 @@ struct ProcessListView: View {
         .sheet(item: $editingProcess) { process in
             EditProcessView(
                 process: process,
-                onSave: { name, command, arguments, path, action in
+                onSave: { name, command, arguments, path, environment, action, autoStart in
                     viewModel.updateProcess(
                         id: process.id,
                         name: name,
                         command: command,
                         arguments: arguments,
                         path: path,
-                        action: action
+                        environment: environment,
+                        action: action,
+                        autoStart: autoStart
                     )
                     editingProcess = nil
                 },
@@ -103,7 +105,9 @@ struct ProcessListView: View {
                     process: process,
                     onStart: { viewModel.startProcess(process) },
                     onStop: { viewModel.stopProcess(process) },
-                    onAction: { viewModel.executeAction(process) }
+                    onAction: { viewModel.executeAction(process) },
+                    onEdit: { editingProcess = process },
+                    onRemove: { viewModel.removeProcess(process) }
                 )
                 .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -160,11 +164,32 @@ struct ProcessRowView: View {
     let onStart: () -> Void
     let onStop: () -> Void
     let onAction: () -> Void
+    let onEdit: () -> Void
+    let onRemove: () -> Void
+
+    @State private var showOutput = false
 
     private var isRunning: Bool { process.status == .running }
     private var hasAction: Bool { !process.action.trimmingCharacters(in: .whitespaces).isEmpty }
 
+    /// Indica que o processo parou por um motivo que vale mostrar (saída não-limpa).
+    private var hasFailureInfo: Bool {
+        !isRunning && !process.exitReason.isEmpty && !process.exitReason.hasPrefix("Encerrou normalmente")
+    }
+
     var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            rowContent
+
+            if hasFailureInfo {
+                failureSection
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: hasFailureInfo)
+        .animation(.easeInOut(duration: 0.2), value: showOutput)
+    }
+
+    private var rowContent: some View {
         HStack(spacing: 10) {
             Circle()
                 .fill(isRunning ? Color.green : Color.gray.opacity(0.35))
@@ -208,7 +233,65 @@ struct ProcessRowView: View {
             .buttonStyle(.bordered)
             .tint(isRunning ? .red : .green)
             .controlSize(.small)
+
+            HStack(spacing: 6) {
+                Button {
+                    onEdit()
+                } label: {
+                    Image(systemName: "pencil")
+                }
+                .foregroundStyle(.secondary)
+                .help("Editar processo")
+
+                Button {
+                    onRemove()
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .foregroundStyle(.red)
+                .help("Remover processo")
+            }
+            .buttonStyle(.plain)
+            .font(.callout)
         }
+    }
+
+    @ViewBuilder
+    private var failureSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                Text(process.exitReason)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+
+            if !process.output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Button(showOutput ? "Ocultar saída" : "Ver saída") {
+                    showOutput.toggle()
+                }
+                .buttonStyle(.borderless)
+                .controlSize(.small)
+                .font(.caption2)
+
+                if showOutput {
+                    ScrollView {
+                        Text(process.output)
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .textSelection(.enabled)
+                    }
+                    .frame(maxHeight: 120)
+                    .padding(6)
+                    .background(.quaternary.opacity(0.3))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+            }
+        }
+        .padding(.leading, 18) // alinha com o texto após o indicador
     }
 
     private var commandPreview: String {
@@ -222,17 +305,19 @@ struct ProcessRowView: View {
 
 struct EditProcessView: View {
     let process: ManagedProcess
-    let onSave: (String, String, String, String, String) -> Void
+    let onSave: (String, String, String, String, String, String, Bool) -> Void
     let onCancel: () -> Void
 
     @State private var name      = ""
     @State private var command   = ""
     @State private var arguments = ""
     @State private var path      = ""
+    @State private var environment = ""
     @State private var action    = ""
+    @State private var autoStart = false
     @FocusState private var focusedField: Field?
 
-    private enum Field { case name, command, arguments, path, action }
+    private enum Field { case name, command, arguments, path, environment, action }
 
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -274,12 +359,23 @@ struct EditProcessView: View {
                     monospaced: true
                 )
                 field(
+                    label: "Variáveis de Ambiente",
+                    placeholder: "Ex: PORT=3000 NODE_ENV=dev  (opcional)",
+                    text: $environment,
+                    focus: .environment,
+                    monospaced: true
+                )
+                field(
                     label: "Ação",
                     placeholder: "Ex: open http://localhost:5173  (opcional)",
                     text: $action,
                     focus: .action,
                     monospaced: true
                 )
+
+                Toggle("Iniciar automaticamente ao abrir o app", isOn: $autoStart)
+                    .toggleStyle(.checkbox)
+                    .help("O processo será iniciado sozinho sempre que o app for aberto")
             }
 
             HStack {
@@ -296,7 +392,9 @@ struct EditProcessView: View {
                         command.trimmingCharacters(in: .whitespaces),
                         arguments.trimmingCharacters(in: .whitespaces),
                         path.trimmingCharacters(in: .whitespaces),
-                        action.trimmingCharacters(in: .whitespaces)
+                        environment.trimmingCharacters(in: .whitespaces),
+                        action.trimmingCharacters(in: .whitespaces),
+                        autoStart
                     )
                 }
                 .keyboardShortcut(.defaultAction)
@@ -311,7 +409,9 @@ struct EditProcessView: View {
             command = process.command
             arguments = process.arguments
             path = process.path
+            environment = process.environment
             action = process.action
+            autoStart = process.autoStart
             focusedField = .name
         }
     }
@@ -337,7 +437,8 @@ struct EditProcessView: View {
                     case .name:      focusedField = .command
                     case .command:   focusedField = .arguments
                     case .arguments: focusedField = .path
-                    case .path:      focusedField = .action
+                    case .path:      focusedField = .environment
+                    case .environment: focusedField = .action
                     case .action:    break
                     }
                 }
