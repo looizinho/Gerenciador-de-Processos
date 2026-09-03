@@ -8,7 +8,7 @@ struct Gerenciador_de_ProcessosApp: App {
 
     var body: some Scene {
         // Ícone na barra de menus → abre a lista de processos como popover
-        MenuBarExtra("Gerenciador de Processos", systemImage: "server.rack") {
+        MenuBarExtra("Gerenciador de Processos", systemImage: "slider.horizontal.2.arrow.trianglehead.counterclockwise") {
             ProcessListView()
                 .environment(viewModel)
         }

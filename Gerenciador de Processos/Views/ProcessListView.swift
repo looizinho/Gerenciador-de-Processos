@@ -48,7 +48,7 @@ struct ProcessListView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Image(systemName: "server.rack")
+            Image(systemName: "slider.horizontal.2.arrow.trianglehead.counterclockwise")
                 .foregroundStyle(.secondary)
             Text("Gerenciador de Processos")
                 .font(.headline)
@@ -82,7 +82,7 @@ struct ProcessListView: View {
     private var emptyState: some View {
         VStack(spacing: 10) {
             Spacer()
-            Image(systemName: "server.rack")
+            Image(systemName: "slider.horizontal.2.arrow.trianglehead.counterclockwise")
                 .font(.system(size: 36))
                 .foregroundStyle(.quaternary)
             Text("Nenhum processo configurado")
