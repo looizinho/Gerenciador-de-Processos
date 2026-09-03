@@ -8,7 +8,6 @@
 
 /* Begin PBXFileReference section */
 		0E0D850B2FBBE3BB0035FD9E /* Gerenciador de Processos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Gerenciador de Processos.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0EF71D4E3049807B00E77647 /* Companion.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Companion.xcodeproj; path = ../Companion/Companion.xcodeproj; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,7 +32,6 @@
 		0E0D85022FBBE3BB0035FD9E = {
 			isa = PBXGroup;
 			children = (
-				0EF71D4E3049807B00E77647 /* Companion.xcodeproj */,
 				0E0D850D2FBBE3BB0035FD9E /* Gerenciador de Processos */,
 				0E0D850C2FBBE3BB0035FD9E /* Products */,
 			);
@@ -43,13 +41,6 @@
 			isa = PBXGroup;
 			children = (
 				0E0D850B2FBBE3BB0035FD9E /* Gerenciador de Processos.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		0EF71D4F3049807B00E77647 /* Products */ = {
-			isa = PBXGroup;
-			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -106,12 +97,6 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0E0D850C2FBBE3BB0035FD9E /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 0EF71D4F3049807B00E77647 /* Products */;
-					ProjectRef = 0EF71D4E3049807B00E77647 /* Companion.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				0E0D850A2FBBE3BB0035FD9E /* Gerenciador de Processos */,
