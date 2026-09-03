@@ -8,10 +8,12 @@ struct AddProcessView: View {
     @State private var command   = ""
     @State private var arguments = ""
     @State private var path      = ""
+    @State private var environment = ""
     @State private var action    = ""
+    @State private var autoStart = false
     @FocusState private var focusedField: Field?
 
-    private enum Field { case name, command, arguments, path, action }
+    private enum Field { case name, command, arguments, path, environment, action }
 
     private var canAdd: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -53,12 +55,23 @@ struct AddProcessView: View {
                     monospaced: true
                 )
                 field(
+                    label: "Variáveis de Ambiente",
+                    placeholder: "Ex: PORT=3000 NODE_ENV=dev  (opcional)",
+                    text: $environment,
+                    focus: .environment,
+                    monospaced: true
+                )
+                field(
                     label: "Ação",
                     placeholder: "Ex: open http://localhost:5173  (opcional)",
                     text: $action,
                     focus: .action,
                     monospaced: true
                 )
+
+                Toggle("Iniciar automaticamente ao abrir o app", isOn: $autoStart)
+                    .toggleStyle(.checkbox)
+                    .help("O processo será iniciado sozinho sempre que o app for aberto")
             }
 
             HStack {
@@ -71,7 +84,9 @@ struct AddProcessView: View {
                         command:   command.trimmingCharacters(in: .whitespaces),
                         arguments: arguments.trimmingCharacters(in: .whitespaces),
                         path:      path.trimmingCharacters(in: .whitespaces),
-                        action:    action.trimmingCharacters(in: .whitespaces)
+                        environment: environment.trimmingCharacters(in: .whitespaces),
+                        action:    action.trimmingCharacters(in: .whitespaces),
+                        autoStart: autoStart
                     )
                     dismiss()
                 }
@@ -106,7 +121,8 @@ struct AddProcessView: View {
                     case .name:      focusedField = .command
                     case .command:   focusedField = .arguments
                     case .arguments: focusedField = .path
-                    case .path:      focusedField = .action
+                    case .path:      focusedField = .environment
+                    case .environment: focusedField = .action
                     case .action:    break
                     }
                 }
