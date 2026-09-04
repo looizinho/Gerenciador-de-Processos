@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+#mvvm #swiftui #macos #guidelines
+
 ## Project Overview
 
 **Gerenciador de Processos** is a native macOS menu bar app written in Swift/SwiftUI for managing local dev servers (start/stop processes, view status, persist configurations). It uses MVVM with Combine and only Apple frameworks — no external dependencies.
